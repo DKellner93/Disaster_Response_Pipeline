@@ -4,6 +4,7 @@ import numpy as np
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
+    """Load two datasets from a file and merge them on their ID"""
     # load messages dataset
     messages = pd.read_csv(messages_filepath)
     # load categories dataset
@@ -15,6 +16,7 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    """Clean the dataset and encode the categories"""
     # create a dataframe of the individual category columns by splitting the categoires column by the ;
     categories = df['categories'].str.split(';', expand=True)
     # select the first row of the categories dataframe
@@ -34,7 +36,7 @@ def clean_data(df):
         categories[column] = pd.to_numeric(categories[column])
     # the realted column may contain entries with the value "2"
     # Since the variables should be only 0 or 1 all values of "2" are mapped 
-#    categories['related']=categories['related'].map(lambda x: 1 if x == 2 else x)
+    categories['related']=categories['related'].map(lambda x: 1 if x == 2 else x)
     
         # drop the original categories column from `df`
     df = df.drop('categories', axis=1)
@@ -49,6 +51,7 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
+    """Save a dataset to a sql database"""
     engine_path = 'sqlite:///' + database_filename
     engine = create_engine(engine_path)
     df.to_sql('DisasterResponse', engine, if_exists = 'replace', index=False)

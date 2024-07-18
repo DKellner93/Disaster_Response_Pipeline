@@ -20,6 +20,16 @@ from sklearn.metrics import classification_report
 import pickle
 
 def load_data(database_filepath):
+    """Load the data from a sql database and store them in the variables needed for the ML-Pipeline
+
+    Args:
+    database_filepath: str. Path to the database
+
+    Returns:
+    X: Dataframe of messages 
+    y: dataframe with the corresponding classification into different message categories
+    category_names: list of the categories used for classification
+    """
     engine_path = 'sqlite:///' + database_filepath
     engine = create_engine(engine_path)
     df = pd.read_sql_table('DisasterResponse', engine)
@@ -30,6 +40,7 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    """tokenize and lemmanize the message to use for ML algorithm"""
     url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     detected_urls = re.findall(url_regex, text)
     for url in detected_urls:
@@ -46,6 +57,7 @@ def tokenize(text):
     return clean_tokens
 
 def build_model():
+    """Setup of Pipeline and GridSearch to train the ML model"""
     pipeline = Pipeline([
         ('features', FeatureUnion([
 
@@ -67,6 +79,7 @@ def build_model():
     return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """Evelatue the model performance on the Test Set"""
     y_pred = model.predict(X_test)
     for i in range(y_pred.shape[1]):
         print("=====================",Y_test.columns[i],"====================")
@@ -75,6 +88,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    """Save Model as a pickle file to later use in a webapp"""
     pickle.dump(model, open(model_filepath, 'wb'))
     return
 
